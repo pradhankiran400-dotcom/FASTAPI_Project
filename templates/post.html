@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <section class="hero">
+        <h2>{{ post.title }}</h2>
+        <p class="meta">
+            {% if post.name %}
+                By {{ post.name }}
+            {% else %}
+                By Guest
+            {% endif %}
+            • {{ post.timestamp }}
+        </p>
+    </section>
+
+    <article class="post-detail">
+        <p>{{ post.content }}</p>
+    </article>
+
+    <div class="refresh-wrap">
+        <a class="refresh-btn" href="/posts">Back to posts</a>
+    </div>
+{% endblock content %}

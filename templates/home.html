@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <section class="hero">
+        <h2>Welcome to the FastAPI Blog</h2>
+        <p>Read short posts about building modern APIs and web apps.</p>
+    </section>
+
+    <section class="posts-list">
+        {% for post in posts %}
+        <article class="post">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+            <div class="meta">
+                {% if post.name %}
+                    By {{ post.name }}
+                {% else %}
+                    By Guest
+                {% endif %}
+                 • {{ post.timestamp }}
+            </div>
+            <a href="/posts/{{ post.id }}">Read more</a>
+        </article>
+        {% endfor %}
+    </section>
+
+    {% if show_refresh %}
+    <div class="refresh-wrap">
+        <a class="refresh-btn" href="{{ base_path }}?page_no={{ next_page }}">See More Posts</a>
+    </div>
+    {% endif %}
+{% endblock content %}

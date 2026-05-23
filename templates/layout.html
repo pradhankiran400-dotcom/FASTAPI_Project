@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if title %}FastAPI Blog - {{ title }}{% else %}FastAPI Blog{% endif %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1 class="site-title">FastAPI Blog</h1>
+            <nav class="site-nav">
+                <a href="/" class="nav-link"><span class="nav-icon">🏠</span>Home</a>
+                <a href="#" class="nav-link"><span class="nav-icon">🔐</span>Login</a>
+                <a href="#" class="nav-link"><span class="nav-icon">✍️</span>Register</a>
+                <button id="themeToggle" class="nav-link theme-toggle" type="button"><span class="nav-icon">🌓</span>Theme</button>
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        {% block content %}{% endblock content %}
+    </main>
+    <footer class="site-footer">
+        <div class="container">Made with ♥ using FastAPI</div>
+    </footer>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

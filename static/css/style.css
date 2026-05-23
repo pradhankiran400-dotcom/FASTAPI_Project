@@ -1,0 +1,231 @@
+:root{
+    --bg: #f6f8fb;
+    --surface: #ffffff;
+    --text: #111827;
+    --muted: #55606c;
+    --border: #e2e8f0;
+    --accent: #1d4ed8;
+    --accent-soft: rgba(59,130,246,0.12);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html, body{
+    margin:0;
+    min-height:100%;
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:linear-gradient(180deg, #eff6ff 0%, #f8fafc 35%, #ffffff 100%);
+    color:var(--text);
+}
+
+body{animation: glow 10s ease-in-out infinite alternate;}
+
+.container{
+    max-width:760px;
+    margin:0 auto;
+    padding:1rem;
+}
+
+.site-header{
+    display:flex;
+    flex-direction:column;
+    gap:0.75rem;
+    border-bottom:1px solid var(--border);
+    padding:1rem 0;
+}
+
+.site-title{
+    margin:0;
+    font-size:1.5rem;
+    letter-spacing:0.02em;
+    color:var(--accent);
+}
+
+.site-nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.5rem;
+}
+
+.nav-link{
+    color:var(--accent);
+    text-decoration:none;
+    padding:0.55rem 0.9rem;
+    border:1px solid transparent;
+    border-radius:999px;
+    font-size:0.95rem;
+    transition:background 200ms ease, transform 200ms ease, border-color 200ms ease;
+}
+
+.nav-icon{
+    margin-right:0.4rem;
+    display:inline-flex;
+    align-items:center;
+}
+
+.nav-link:hover{
+    background:var(--accent-soft);
+    transform:translateY(-1px);
+    border-color:rgba(29,78,216,0.25);
+}
+
+.hero{
+    margin:1.5rem 0 1rem;
+    animation: fadeInUp 0.7s ease both;
+}
+
+.hero h2{
+    margin:0 0 0.5rem;
+    font-size:2rem;
+}
+
+.hero p{
+    margin:0;
+    color:var(--muted);
+    max-width:42rem;
+}
+
+.posts-list{
+    display:grid;
+    gap:1rem;
+}
+
+.post{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:1.25rem;
+    box-shadow:0 18px 60px rgba(15,23,42,0.08);
+    transition:transform 250ms ease, box-shadow 250ms ease;
+    animation: fadeInUp 0.7s ease both;
+}
+
+.post:hover{
+    transform:translateY(-4px);
+    box-shadow:0 24px 80px rgba(15,23,42,0.12);
+}
+
+.post h3{
+    margin:0 0 0.5rem;
+    font-size:1.25rem;
+}
+
+.post p{
+    margin:0 0 0.85rem;
+    color:var(--muted);
+    line-height:1.7;
+}
+
+.post-detail{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:1.5rem;
+    box-shadow:0 18px 60px rgba(15,23,42,0.08);
+    margin-bottom:1.5rem;
+}
+
+.post-detail p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.8;
+}
+
+.meta{
+    margin-bottom:0.85rem;
+    font-size:0.95rem;
+    color:var(--muted);
+}
+
+.post a{
+    color:var(--accent);
+    text-decoration:none;
+    font-weight:700;
+}
+
+.site-footer{
+    border-top:1px solid var(--border);
+    padding:1rem 0;
+    color:var(--muted);
+    font-size:0.9rem;
+    text-align:center;
+    margin-top:2rem;
+}
+
+.refresh-wrap{
+    display:flex;
+    justify-content:center;
+    margin:1.5rem 0 0;
+}
+
+.refresh-btn{
+    display:inline-block;
+    background:var(--accent);
+    color:#fff;
+    text-decoration:none;
+    padding:0.75rem 1.25rem;
+    border-radius:999px;
+    transition:transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.refresh-btn:hover{
+    transform:translateY(-2px);
+    background:#1e40af;
+    box-shadow:0 12px 30px rgba(59,130,246,0.2);
+}
+
+@keyframes fadeInUp{
+    from{opacity:0;transform:translateY(16px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+@keyframes glow{
+    from{background-position:0% 0%;}
+    to{background-position:100% 100%;}
+}
+
+@media (max-width:640px){
+    .site-nav{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+}
+
+body.dark{
+    background: #020617;
+    color: #e2e8f0;
+}
+
+body.dark .site-title{
+    color: #60a5fa;
+}
+
+body.dark .nav-link{
+    color: #64a3f6;
+    border-color: rgba(148,163,184,0.24);
+}
+
+body.dark .nav-link:hover{
+    background: rgba(148,163,184,0.12);
+}
+
+body.dark .post{
+    background: #0f172a;
+    border-color: #1f2937;
+    box-shadow:0 18px 60px rgba(15,23,42,0.3);
+}
+
+body.dark .post p,
+body.dark .meta,
+body.dark .site-footer,
+body.dark .hero p{
+    color: #cbd5e1;
+}
+
+body.dark .site-footer{
+    border-color: #1f2937;
+}
+
+
