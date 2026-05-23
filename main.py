@@ -1,7 +1,9 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, HTTPException, Form
+from fastapi.responses import HTMLResponse, RedirectResponse,JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from datetime import datetime
 
 app = FastAPI()
@@ -50,36 +52,80 @@ def home(request: Request):
         end = page_size
 
     current_time = datetime.now().strftime("%b %d, %Y %I:%M %p")
-    display_posts = [
-        {**post, "timestamp": current_time}
-        for post in posts[start:end]
-    ]
+    # display_posts = [
+    #     {**post, "timestamp": current_time}
+    #     for post in posts[start:end]
+    # ]
+    display_posts = []
+    for post in posts[start:end]:
+        naya_post = post.copy()
+        naya_post["timestamp"] = current_time
+        display_posts.append(naya_post)
     next_page = page + 1 if end < total_posts else 1
     show_refresh = total_posts > page_size
 
     return templates.TemplateResponse(
-        request,
-        "home.html",
-        {
-            "posts": display_posts,
-            "title": "HOME🏠",
-            "next_page": next_page,
-            "show_refresh": show_refresh,
-            "base_path": request.url.path,
-        },
-    )
+            request,       
+            "home.html",   
+            {              
+                "posts": display_posts,
+                "title": "HOME🏠",
+                "next_page": next_page,
+                "show_refresh": show_refresh,
+                "base_path": request.url.path,
+            },
+        )
 
 @app.get("/posts/{id}")
 def get_post(id: int, request: Request):
     for post in posts:
         if post.get("id") == id:
-            display_post = {**post, "timestamp": post.get("timestamp") or get_now_timestamp()}
+            display_post = {
+                "id" :post["id"],
+                "title": post["title"],
+                "content": post["content"],
+                "name": post.get("name", "Guest"),
+                "timestamp": post.get("timestamp", get_now_timestamp())
+            }
             return templates.TemplateResponse(
                 request,
                 "post.html",
                 {
                     "post": display_post,
                     "title": display_post["title"],
+                    "views":100 #dummy number
                 },
             )
     raise HTTPException(status_code=404, detail="Post not found")
+
+@app.exception_handler(StarletteHTTPException)
+def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    # message = (
+    #     exc.detail
+    #     if exc.detail
+    #     else "An error occurred while processing your request."
+
+
+    # )
+    if exc.status_code == 404:
+        message = "The page you are looking for does not exist."
+    elif exc.status_code == 500:
+        message = "An internal server error occurred."
+    else:
+        message = exc.detail if exc.detail else "An error occurred while processing your request."
+#     if request.url.path.startswith("/posts/"):
+#         return JSONResponse(
+#             status_code = exc.status_code,
+#             content = {"detail": message}
+# )
+    
+    return templates.TemplateResponse(
+        request,
+        "error.html",
+        {"status_code": exc.status_code,
+         "title": f"Error {exc.status_code}",
+         "message": message},
+        status_code=exc.status_code, #the need to set status code here is because by default it will be 200 and we want to set it to the actual error code
+    )
+
+

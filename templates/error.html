@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <section class="hero">
+        <h1>Error {{ status_code }}</h1>
+        <h2>Oops! Something went wrong.</h2>
+        <p>{{message }}</p>
+    </section>
+
+    <div class="refresh-wrap">
+        <a class="refresh-btn" href="/">Back to Home</a>
+    </div>
+{% endblock content %}
