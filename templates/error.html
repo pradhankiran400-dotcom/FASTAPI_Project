@@ -1,13 +1,10 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <section class="hero">
-        <h1>Error {{ status_code }}</h1>
-        <h2>Oops! Something went wrong.</h2>
-        <p>{{ message }}</p>
-    </section>
-
-    <div class="refresh-wrap">
-        <a class="refresh-btn" href="/">Back to Home</a>
-    </div>
+<div class="error-page">
+    <div class="error-code">{{ status_code }}</div>
+    <h2 class="error-title">Oops! Something went wrong.</h2>
+    <p class="error-message">{{ message }}</p>
+    <a class="btn btn-primary" href="/">Back to Home</a>
+</div>
 {% endblock content %}

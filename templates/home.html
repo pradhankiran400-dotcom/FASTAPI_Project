@@ -2,30 +2,56 @@
 
 {% block content %}
     <section class="hero">
-        <h2>Welcome to the FastAPI Blog</h2>
-        <p>Read short posts about building modern APIs and web apps.</p>
+        <h2 class="hero-title">Welcome to the FastAPI Blog</h2>
+        <p class="hero-sub">Read short posts about building modern APIs and web apps.</p>
     </section>
 
-    <section class="posts-list">
-        {% for post in posts %}
-        <article class="post">
-            <h3>{{ post.title }}</h3>
-            <p>{{ post.content }}</p>
-            <div class="meta">
-                {% if post.name %}
-                    By {{ post.name }}
-                {% else %}
-                    By Guest
-                {% endif %}
-                 • {{ post.timestamp }}
+    <div class="posts-grid">
+        {% if posts %}
+            {% for post in posts %}
+            <article class="post-card" style="--delay: {{ loop.index0 * 80 }}ms">
+                <div class="post-card-meta">
+                    {% if post.author %}
+                    <a class="author-chip" href="/users/{{ post.author.id }}/posts">
+                        <img class="avatar-xs" src="{{ post.author.image_path }}" alt="{{ post.author.username }}">
+                        <div class="author-chip-info">
+                            <span class="author-name">{{ post.author.username }}</span>
+                        </div>
+                    </a>
+                    {% else %}
+                    <div class="author-chip">
+                        <img class="avatar-xs" src="/static/images/avatar.svg" alt="Guest">
+                        <div class="author-chip-info">
+                            <span class="author-name">Guest</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if post.date_posted %}
+                    <time class="post-date" datetime="{{ post.date_posted.isoformat() }}">
+                        {{ post.date_posted.strftime("%b %d, %Y") }}
+                    </time>
+                    {% endif %}
+                </div>
+                <h2 class="post-card-title">
+                    <a href="/posts/{{ post.id }}">{{ post.title }}</a>
+                </h2>
+                <p class="post-card-excerpt">
+                    {{ post.content[:160] }}{% if post.content|length > 160 %}&hellip;{% endif %}
+                </p>
+                <a class="read-more" href="/posts/{{ post.id }}">Read more &rarr;</a>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <span class="empty-icon">📝</span>
+                <p>No posts available yet. Be the first to write one!</p>
             </div>
-            <a href="/posts/{{ post.id }}">Read more</a>
-        </article>
-        {% endfor %}
-    </section>
+        {% endif %}
+    </div>
 
     {% if show_refresh %}
-    <div class="refresh-wrap">
+    <div class="refresh-wrap" style="margin-top: 3rem;">
         <a class="refresh-btn" href="{{ base_path }}?page_no={{ next_page }}">See More Posts</a>
     </div>
     {% endif %}

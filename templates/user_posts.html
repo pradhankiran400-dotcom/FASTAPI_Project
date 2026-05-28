@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="user-profile-header">
+  <img
+    src="{{ user.image_path }}"
+    alt="{{ user.username }}"
+    class="avatar-lg"
+  />
+  <div class="user-profile-info">
+    <h1>{{ user.username }}</h1>
+    <p class="user-email">{{ user.email }}</p>
+    <span class="post-count-badge">{{ posts|length }} post{% if posts|length != 1 %}s{% endif %}</span>
+  </div>
+</section>
+
+<div class="posts-grid">
+  {% if posts %}
+    {% for post in posts %}
+    <article class="post-card" style="--delay: {{ loop.index0 * 80 }}ms">
+      <div class="post-card-meta">
+        <time class="post-date" datetime="{{ post.date_posted.isoformat() }}">
+          {{ post.date_posted.strftime("%b %d, %Y") }}
+        </time>
+      </div>
+      <h2 class="post-card-title">
+        <a href="/posts/{{ post.id }}">{{ post.title }}</a>
+      </h2>
+      <p class="post-card-excerpt">
+        {{ post.content[:160] }}{% if post.content|length > 160 %}&hellip;{% endif %}
+      </p>
+      <a href="/posts/{{ post.id }}" class="read-more">Read more &rarr;</a>
+    </article>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">📄</span>
+      <p>{{ user.username }} hasn't written anything yet.</p>
+    </div>
+  {% endif %}
+</div>
+
+<div class="pagination">
+  <a href="/" class="btn btn-outline">&larr; Back to All Posts</a>
+</div>
+{% endblock content %}

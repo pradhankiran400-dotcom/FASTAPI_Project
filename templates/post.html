@@ -1,24 +1,43 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <section class="hero">
-        <h2>{{ post.title }}</h2>
-        <p class="meta">
-            {% if post.name %}
-                By {{ post.name }}
+<div class="post-detail">
+    <header class="post-header">
+        <div class="post-header-meta">
+            {% if post.author %}
+            <a class="author-chip" href="/users/{{ post.author.id }}/posts">
+                <img class="avatar-sm" src="{{ post.author.image_path }}" alt="{{ post.author.username }}">
+                <div class="author-chip-info">
+                    <span class="author-name">{{ post.author.username }}</span>
+                </div>
+            </a>
             {% else %}
-                By Guest
+            <div class="author-chip">
+                <img class="avatar-sm" src="/static/images/avatar.svg" alt="Guest">
+                <div class="author-chip-info">
+                    <span class="author-name">Guest</span>
+                </div>
+            </div>
             {% endif %}
-            • {{ post.timestamp }}
-        </p>
-    </section>
 
-    <article class="post-detail">
-        <p>{{ post.content }}</p>
-        <p>Views: {{ views }}</p>
+            {% if post.date_posted %}
+            <time class="post-date" datetime="{{ post.date_posted.isoformat() }}">
+                {{ post.date_posted.strftime("%b %d, %Y %I:%M %p") }}
+            </time>
+            {% endif %}
+        </div>
+        <h1 class="post-title">{{ post.title }}</h1>
+    </header>
+
+    <article class="post-body">
+        {{ post.content }}
     </article>
 
-    <div class="refresh-wrap">
-        <a class="refresh-btn" href="/posts">Back to posts</a>
-    </div>
+    <footer class="post-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="post-stats">
+            <span>👁️ {{ views }} view{% if views != 1 %}s{% endif %}</span>
+        </div>
+        <a class="btn btn-outline" href="/">← Back to All Posts</a>
+    </footer>
+</div>
 {% endblock content %}
