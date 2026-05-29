@@ -6,10 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from datetime import datetime
-from schemas import PostCreate, PostResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import models
 from database import Base, engine, get_db
@@ -26,7 +24,7 @@ def get_now_timestamp():
     return datetime.now().strftime("%b %d, %Y %I:%M %p")
 
 @app.get("/",include_in_schema=False,name="home")
-@app.get("/posts",include_in_schema=False,name="posts",)
+@app.get("/posts",include_in_schema=False,name="posts")
 def home(request: Request,db: Annotated[Session, Depends(get_db)]):
     result = db.execute(select(models.Post))
     posts = result.scalars().all()
@@ -69,11 +67,11 @@ def create_user(username: Annotated[str, Form()], email: Annotated[str, Form()],
     result = db.execute(select(models.User).where(models.User.username == username))
     existing_user = result.scalars().first()
     if existing_user:
-        raise HTTPException(status_code=400, detail="Username already exists")
+        return RedirectResponse(url="/?error=username_exists", status_code=status.HTTP_303_SEE_OTHER)
     result = db.execute(select(models.User).where(models.User.email == email))
     existing_email = result.scalars().first()
     if existing_email:
-        raise HTTPException(status_code=400, detail="Email already exists")
+        return RedirectResponse(url="/?error=email_exists", status_code=status.HTTP_303_SEE_OTHER)
     new_user = models.User(username=username, email=email)
     db.add(new_user)
     db.commit()
@@ -105,7 +103,6 @@ def get_post(id: int, request: Request,db: Annotated[Session, Depends(get_db)]):
             "views": 100,  # dummy number
         },
     )
-    raise HTTPException(status_code=404, detail="Post not found")
 
 @app.get("/users/{user_id}/posts",response_class=HTMLResponse,include_in_schema=False)
 def user_post_page(
@@ -130,7 +127,6 @@ def user_post_page(
         },
     )
 
-    
 
 @app.post("/posts",response_model = PostResponse,status_code = status.HTTP_201_CREATED)
 def create_post(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
@@ -148,6 +144,33 @@ def create_post(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
     db.commit()
     db.refresh(new_post)
     return new_post
+
+@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.Post).where(models.Post.id == id))
+    post = result.scalars().first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    db.delete(post)
+    db.commit()
+    return None
+
+@app.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Cascade delete posts for the user to maintain integrity
+    posts_result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
+    posts = posts_result.scalars().all()
+    for post in posts:
+        db.delete(post)
+        
+    db.delete(user)
+    db.commit()
+    return None
 
 @app.exception_handler(StarletteHTTPException)
 def http_exception_handler(request: Request, exc: StarletteHTTPException):
@@ -178,5 +201,7 @@ def http_exception_handler(request: Request, exc: StarletteHTTPException):
          "message": message},
         status_code=exc.status_code, #the need to set status code here is because by default it will be 200 and we want to set it to the actual error code
     )
+
+
 
 

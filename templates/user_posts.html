@@ -17,7 +17,7 @@
 <div class="posts-grid">
   {% if posts %}
     {% for post in posts %}
-    <article class="post-card" style="--delay: {{ loop.index0 * 80 }}ms">
+    <article class="post-card">
       <div class="post-card-meta">
         <time class="post-date" datetime="{{ post.date_posted.isoformat() }}">
           {{ post.date_posted.strftime("%b %d, %Y") }}

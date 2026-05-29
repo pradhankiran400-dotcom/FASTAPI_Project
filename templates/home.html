@@ -9,7 +9,7 @@
     <div class="posts-grid">
         {% if posts %}
             {% for post in posts %}
-            <article class="post-card" style="--delay: {{ loop.index0 * 80 }}ms">
+            <article class="post-card">
                 <div class="post-card-meta">
                     {% if post.author %}
                     <a class="author-chip" href="/users/{{ post.author.id }}/posts">
