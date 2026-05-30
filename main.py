@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 import models
 from database import Base, engine, get_db
-from schemas import PostCreate, PostResponse, UserResponse
+from schemas import PostCreate, PostResponse, UserResponse, PostUpdate, UserUpdate
 
 Base.metadata.create_all(bind=engine) #to create the tables in the database based on the models defined in models.py
 
@@ -23,8 +23,8 @@ templates = Jinja2Templates(directory="templates")
 def get_now_timestamp():
     return datetime.now().strftime("%b %d, %Y %I:%M %p")
 
-@app.get("/",include_in_schema=False,name="home")
-@app.get("/posts",include_in_schema=False,name="posts")
+@app.get("/", name="home")
+@app.get("/posts", name="posts")
 def home(request: Request,db: Annotated[Session, Depends(get_db)]):
     result = db.execute(select(models.Post))
     posts = result.scalars().all()
@@ -87,7 +87,7 @@ def get_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
     return user
 
 
-@app.get("/posts/{id}",response_class=HTMLResponse,include_in_schema=False)
+@app.get("/posts/{id}", response_class=HTMLResponse)
 def get_post(id: int, request: Request,db: Annotated[Session, Depends(get_db)]):
     result = db.execute(select(models.Post).where(models.Post.id == id))
     post = result.scalars().first()
@@ -104,7 +104,7 @@ def get_post(id: int, request: Request,db: Annotated[Session, Depends(get_db)]):
         },
     )
 
-@app.get("/users/{user_id}/posts",response_class=HTMLResponse,include_in_schema=False)
+@app.get("/users/{user_id}/posts", response_class=HTMLResponse)
 def user_post_page(
     requests : Request,
     user_id : int,
@@ -145,6 +145,63 @@ def create_post(post: PostCreate, db: Annotated[Session, Depends(get_db)]):
     db.refresh(new_post)
     return new_post
 
+@app.put("/posts/{id}", response_model=PostResponse)
+def update_post(id: int, post_update: PostUpdate, db: Annotated[Session, Depends(get_db)]):
+    # Fetch the post from the database
+    result = db.execute(select(models.Post).where(models.Post.id == id))
+    post = result.scalars().first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    # If the post is being reassigned to a different user, verify the new user exists
+    if post_update.user_id != post.user_id:
+        result = db.execute(select(models.User).where(models.User.id == post_update.user_id))
+        user = result.scalars().first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+    post.title = post_update.title
+    post.content = post_update.content
+    post.user_id = post_update.user_id
+    
+    db.commit()
+    db.refresh(post)
+    return post
+
+@app.patch("/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user_update: UserUpdate, db: Annotated[Session, Depends(get_db)]):
+    # Fetch the user from the database
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if the username is being updated, and if so, check for uniqueness collisions
+    if user_update.username is not None and user_update.username != user.username:
+        result = db.execute(select(models.User).where(models.User.username == user_update.username))
+        existing_user = result.scalars().first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Username already exists")
+
+    # Check if the email is being updated, and if so, check for uniqueness collisions
+    if user_update.email is not None and user_update.email != user.email:
+        result = db.execute(select(models.User).where(models.User.email == user_update.email))
+        existing_email = result.scalars().first()
+        if existing_email:
+            raise HTTPException(status_code=400, detail="Email already exists")
+
+    # Update fields if provided
+    if user_update.username is not None:
+        user.username = user_update.username
+    if user_update.email is not None:
+        user.email = user_update.email
+    if user_update.image_file is not None:
+        user.image_file = user_update.image_file
+
+    db.commit()
+    db.refresh(user)
+    return user
+
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Annotated[Session, Depends(get_db)]):
     result = db.execute(select(models.Post).where(models.Post.id == id))
@@ -162,12 +219,6 @@ def delete_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Cascade delete posts for the user to maintain integrity
-    posts_result = db.execute(select(models.Post).where(models.Post.user_id == user_id))
-    posts = posts_result.scalars().all()
-    for post in posts:
-        db.delete(post)
-        
     db.delete(user)
     db.commit()
     return None

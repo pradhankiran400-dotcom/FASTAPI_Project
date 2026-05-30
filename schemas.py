@@ -24,3 +24,13 @@ class PostResponse(PostBase):
     user_id: int
     date_posted: datetime
     author: UserResponse
+
+class PostUpdate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=100, example="My First Post")
+    content: str = Field(..., min_length=1, max_length=1000, example="This is the content of my first post.")
+    user_id: int = Field(..., example=1)
+
+class UserUpdate(BaseModel):
+    username: str | None = Field(None, min_length=2, max_length=50, example="johndoe")
+    email: EmailStr | None = Field(None, example="johndoe@example.com")
+    image_file: str | None = Field(None, example="profile.jpg")
